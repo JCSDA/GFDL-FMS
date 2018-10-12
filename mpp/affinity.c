@@ -11,9 +11,14 @@
 
 static pid_t gettid(void)
 {
+#ifdef __APPLE__
+  return syscall(SYS_gettid);
+#else
   return syscall(__NR_gettid);
+#endif
 }
 
+#ifndef __APPLE__
 /*
  * Returns this thread's CPU affinity, if bound to a single core,
  * or else -1.
@@ -61,3 +66,4 @@ void set_cpu_affinity( int cpu )
 }
 
 void set_cpu_affinity_(int *cpu) { set_cpu_affinity(*cpu); }	/* Fortran interface */
+#endif
