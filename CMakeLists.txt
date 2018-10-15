@@ -65,9 +65,8 @@ include_directories( ${NETCDF_INCLUDE_DIR} )
 # Definitions
 ################################################################################
 
-set(COMPDEFS "-Duse_libMPI;-Duse_netCDF;-DSPMD")
-
-add_definitions( ${COMPDEFS} )
+# FMS compiler flags are set here (e.g. -Duse_libMPI, etc.)
+include( fms_compiler_flags )
 
 ################################################################################
 # Export package info
@@ -94,7 +93,6 @@ endforeach()
 # Sources
 ################################################################################
 
-include( fms_compiler_flags )
 include_directories( ${FMS_INCLUDE_DIRS} ${FMS_EXTRA_INCLUDE_DIRS} )
 
 ################################################################################
