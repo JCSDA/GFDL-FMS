@@ -72,8 +72,6 @@ include( fms_compiler_flags )
 # Export package info
 ################################################################################
 
-list( APPEND FMS_TPLS MPI NetCDF )
-
 set( FMS_INCLUDE_DIRS ${CMAKE_Fortran_MODULE_DIRECTORY}
                       ${CMAKE_CURRENT_SOURCE_DIR}/include
                       ${CMAKE_CURRENT_SOURCE_DIR}/mpp/include
@@ -81,6 +79,8 @@ set( FMS_INCLUDE_DIRS ${CMAKE_Fortran_MODULE_DIRECTORY}
 set( FMS_LIBRARIES fms )
 
 get_directory_property( FMS_DEFINITIONS COMPILE_DEFINITIONS )
+
+list( APPEND FMS_TPLS NetCDF )
 
 foreach( _tpl ${FMS_TPLS} )
   string( TOUPPER ${_tpl} TPL )
