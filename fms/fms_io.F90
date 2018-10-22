@@ -642,7 +642,10 @@ subroutine fms_io_init()
      call mpp_error(FATAL,'fms_io_init: only NetCDF format currently supported in fms_io')
   end select
 
-! Initially allocate  files_write and files_read
+  ! Initially allocate  files_write and files_read
+  if (allocated(files_write)) deallocate(files_write)
+  if (allocated(files_read)) deallocate(files_read)  
+  if (allocated(registered_file)) deallocate(registered_file)  
   allocate(files_write(max_files_w),files_read(max_files_r))
   allocate(registered_file(max_files_w))
 
@@ -858,7 +861,6 @@ subroutine fms_io_exit()
     enddo ! end i loop
 
     !--- release the memory
-
     do i = 1,  num_files_w
        do j = 1, files_write(i)%nvar
           deallocate(files_write(i)%var(j)%buffer)
