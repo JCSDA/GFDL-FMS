@@ -4,11 +4,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 # Standard FMS compiler definitions
-add_definitions( -Duse_libMPI -Duse_netCDF -DSPMD )
-
-if( NOT CMAKE_BUILD_TYPE MATCHES "Debug" )
-  add_definitions( -DNDEBUG )
-endif( )
+add_definitions( -Duse_libMPI -DSPMD -Duse_netCDF -Duse_LARGEFILE )
 
 # Add platform specific compiler definitions
 if( APPLE )

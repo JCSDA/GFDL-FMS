@@ -9,7 +9,7 @@
 
 cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
 
-project( fms C CXX Fortran )
+project( fms C Fortran )
 
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH} )
 
@@ -29,9 +29,8 @@ ecbuild_requires_macro_version( 2.7 )
 ecbuild_declare_project()
 
 ecbuild_enable_fortran( REQUIRED )
-ecbuild_add_cxx11_flags()
 
-set( FMS_LINKER_LANGUAGE CXX )
+set( FMS_LINKER_LANGUAGE Fortran )
 
 ################################################################################
 # Dependencies
@@ -40,15 +39,15 @@ set( FMS_LINKER_LANGUAGE CXX )
 # MPI
 ecbuild_add_option( FEATURE MPI DEFAULT ON
                     DESCRIPTION "Support for MPI distributed parallelism"
-                    REQUIRED_PACKAGES "MPI COMPONENTS CXX Fortran" )
-ecbuild_find_mpi( COMPONENTS CXX Fortran REQUIRED )
+                    REQUIRED_PACKAGES "MPI COMPONENTS Fortran" )
+ecbuild_find_mpi( COMPONENTS Fortran REQUIRED )
 ecbuild_include_mpi()
-link_libraries(${MPI_CXX_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+link_libraries(${MPI_Fortran_LIBRARIES})
 
 # OpenMP
 ecbuild_add_option( FEATURE OMP
                     DESCRIPTION "Support for OpenMP threaded parallelism"
-                    REQUIRED_PACKAGES "OMP COMPONENTS CXX Fortran" )
+                    REQUIRED_PACKAGES "OMP COMPONENTS Fortran" )
 
 if( HAVE_OMP )
   ecbuild_enable_omp()
@@ -64,9 +63,6 @@ include_directories( ${NETCDF_INCLUDE_DIR} )
 ################################################################################
 # Definitions
 ################################################################################
-
-# FMS compiler flags are set here (e.g. -Duse_libMPI, etc.)
-include( fms_compiler_flags )
 
 ################################################################################
 # Export package info
@@ -92,6 +88,9 @@ endforeach()
 ################################################################################
 # Sources
 ################################################################################
+
+# FMS compiler flags are set here (e.g. -Duse_libMPI, etc.)
+include( fms_compiler_flags )
 
 include_directories( ${FMS_INCLUDE_DIRS} ${FMS_EXTRA_INCLUDE_DIRS} )
 
@@ -312,7 +311,7 @@ tridiagonal/tridiagonal.F90
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_src_files}
                      LIBS     ${NETCDF_LIBRARIES}
-                     LINKER_LANGUAGE ${OOPS_LINKER_LANGUAGE}
+                     LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
 ################################################################################
 
