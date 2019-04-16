@@ -177,15 +177,7 @@ mosaic/mosaic_util.c
 mosaic/mosaic_util.h
 mosaic/read_mosaic.c
 mosaic/read_mosaic.h
-)
-
-if( NOT APPLE )
-  list( APPEND fms_src_files
-  mpp/affinity.c
-  )
-endif()
-
-list( APPEND fms_src_files
+mpp/affinity.c
 mpp/mpp.F90
 mpp/mpp_data.F90
 mpp/mpp_domains.F90
