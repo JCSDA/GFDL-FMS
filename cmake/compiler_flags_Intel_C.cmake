@@ -7,12 +7,6 @@
 # FLAGS COMMON TO ALL BUILD TYPES
 ####################################################################
 
-if( HAVE_OMP )
-  set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -qopenmp")
-else( )
-  set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -qopenmp-stubs")
-endif( )
-
 ####################################################################
 # RELEASE FLAGS
 ####################################################################

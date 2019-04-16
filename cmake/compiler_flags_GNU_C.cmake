@@ -7,12 +7,6 @@
 # FLAGS COMMON TO ALL BUILD TYPES
 ####################################################################
 
-if( HAVE_OMP )
-  set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wno-deprecated-declarations -fopenmp")
-else( )
-  set( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wall -Wno-deprecated-declarations -fno-openmp")
-endif( )
-
 ####################################################################
 # RELEASE FLAGS
 ####################################################################
