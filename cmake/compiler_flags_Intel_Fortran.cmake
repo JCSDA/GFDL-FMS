@@ -7,7 +7,7 @@
 # FLAGS COMMON TO ALL BUILD TYPES
 ####################################################################
 
-set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fno-alias -auto -safe-cray-ptr -ftz -assume byterecl -i4 -r8 -nowarn -sox -traceback -msse2" )
+set( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fno-alias -auto -safe-cray-ptr -ftz -assume byterecl -i4 -r8 -nowarn -sox -traceback" )
 
 ####################################################################
 # RELEASE FLAGS
