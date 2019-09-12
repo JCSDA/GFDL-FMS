@@ -277,7 +277,7 @@
 
       !----------------------------------------------------------------------
       buffer_pos = buffer_recv_size
-      call  mpp_clock_begin(unpack_clock)
+      call  mpp_clock_begin(unpk_clock)
       do m = 1, update%nsend
          send_msgsize(m) = 0
          overPtr => update%send(m)
@@ -359,7 +359,7 @@
          send_msgsize(m) = pos-buffer_pos
          buffer_pos = pos
       end do ! end do m = 1, nsend
-      call mpp_clock_end(unpack_clock)
+      call mpp_clock_end(unpk_clock)
 
       call mpp_clock_begin(wait_clock)
       call mpp_sync_self()
