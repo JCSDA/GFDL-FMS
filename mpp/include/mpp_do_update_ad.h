@@ -176,16 +176,7 @@
                tMe = overPtr%tileMe(n)
                is = overPtr%is(n); ie = overPtr%ie(n)
                js = overPtr%js(n); je = overPtr%je(n)
-               select case( overPtr%rotation(n) )
-               case(ZERO)
-                  pos = pos + (ie-is+1)*(je-js+1)*ke*l_size
-               case( MINUS_NINETY )
-                  pos = pos + (ie-is+1)*(je-js+1)*ke*l_size
-               case( NINETY )
-                  pos = pos + (ie-is+1)*(je-js+1)*ke*l_size
-               case( ONE_HUNDRED_EIGHTY )
-                  pos = pos + (ie-is+1)*(je-js+1)*ke*l_size
-               end select
+               pos = pos + (ie-is+1)*(je-js+1)*ke*l_size
             endif
          end do ! do n = 1, overPtr%count
 
