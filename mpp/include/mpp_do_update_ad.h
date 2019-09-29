@@ -188,7 +188,6 @@
       !----------------------------------------------------------------------
       !recv
       buffer_pos = buffer_recv_size
-      call  mpp_clock_begin(pack_clock)
       do m = update%nrecv, 1, -1
          overPtr => update%recv(m)
          if( overPtr%count == 0 )cycle
@@ -216,11 +215,9 @@
             endif
          end do ! do n = 1, overPtr%count
       end do
-      call mpp_clock_end(pack_clock)
 
       !----------------------------------------------------------------------
       buffer_pos = send_start_pos
-      call mpp_clock_begin(recv_clock)
       do m = 1, update%nsend
          msgsize = send_msgsize(m)
          if(msgsize == 0) cycle
@@ -228,12 +225,10 @@
          call mpp_recv( buffer(buffer_pos+1), glen=msgsize, from_pe=to_pe, block=.FALSE., tag=COMM_TAG_2 )
          buffer_pos = buffer_pos + msgsize
       end do ! end do ist = 0,nlist-1
-      call mpp_clock_end(recv_clock)
 
       !----------------------------------------------------------------------
       !recv
       buffer_pos = 0
-      call mpp_clock_begin(send_clock)
       do m = 1, update%nrecv
          overPtr => update%recv(m)
          if( overPtr%count == 0 )cycle
@@ -260,15 +255,11 @@
             buffer_pos = buffer_pos + msgsize
          end if
       end do ! end do m = 1, update%nrecv
-      call mpp_clock_end(send_clock)
 
-      call mpp_clock_begin(wait_clock)
       call mpp_sync_self(check=EVENT_RECV)
-      call mpp_clock_end(wait_clock)
 
       !----------------------------------------------------------------------
       buffer_pos = buffer_recv_size
-      call  mpp_clock_begin(unpk_clock)
       do m = 1, update%nsend
          send_msgsize(m) = 0
          overPtr => update%send(m)
@@ -350,11 +341,8 @@
          send_msgsize(m) = pos-buffer_pos
          buffer_pos = pos
       end do ! end do m = 1, nsend
-      call mpp_clock_end(unpk_clock)
 
-      call mpp_clock_begin(wait_clock)
       call mpp_sync_self()
-      call mpp_clock_end(wait_clock)
 
       return
     end subroutine MPP_DO_UPDATE_AD_3D_
