@@ -3723,8 +3723,8 @@ integer :: len
 
 len = len_trim(string)
 if (string(len:len) == CHAR(0)) len = len -1
-
-chomp = string(:len)
+chomp(:) = ' '
+chomp(:MIN(len,64)) = string(:len)
 
 end function chomp
 !
