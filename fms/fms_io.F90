@@ -186,14 +186,14 @@ end type meta_type
 
 type ax_type
    private
-   character(len=128) :: name = ''
-   character(len=128) :: units = ''
-   character(len=128) :: longname = ''
-   character(len=8)   :: cartesian = ''
-   character(len=256) :: compressed = ''
-   character(len=128) :: dimlen_name = ''
-   character(len=128) :: dimlen_lname = ''
-   character(len=128) :: calendar = ''
+   character(len=1024) :: name = ''
+   character(len=1024) :: units = ''
+   character(len=1024) :: longname = ''
+   character(len=8)    :: cartesian = ''
+   character(len=256)  :: compressed = ''
+   character(len=1024) :: dimlen_name = ''
+   character(len=1024) :: dimlen_lname = ''
+   character(len=1024) :: calendar = ''
    integer            :: sense              !Orientation of z axis definition
    integer            :: dimlen             !max dim of elements across global domain
    real               :: min             !valid min for real axis data
@@ -213,9 +213,9 @@ end type ax_type
 
 type var_type
    private
-   character(len=128)                     :: name = ''
-   character(len=128)                     :: longname = ''
-   character(len=128)                     :: units = ''
+   character(len=1024)                    :: name = ''
+   character(len=1024)                    :: longname = ''
+   character(len=1024)                    :: units = ''
    real, dimension(:,:,:,:), allocatable :: buffer
    logical                                :: domain_present = .FALSE.
    integer                                :: domain_idx = -1
@@ -295,7 +295,7 @@ end type Ptr3Di
 type restart_file_type
    private
    integer                                  :: unit = -1 ! mpp_io unit for netcdf file
-   character(len=128)                       :: name = ''
+   character(len=1024)                      :: name = ''
    integer                                  :: register_id = 0
    integer                                  :: nvar = 0
    integer                                  :: natt = 0
@@ -484,7 +484,7 @@ integer :: num_registered_files = 0 ! mumber of files registered by calling regi
 integer :: thread_r, form
 logical :: module_is_initialized = .FALSE.
 
-character(len=128):: error_msg
+character(len=1024) :: error_msg
 logical           :: great_circle_algorithm=.FALSE.
 
 !------ private data, pointer to current 2d domain ------
@@ -494,7 +494,7 @@ type(domain2D), pointer, private :: Current_domain =>NULL()
 integer, private :: is,ie,js,je      ! compute domain
 integer, private :: isd,ied,jsd,jed  ! data domain
 integer, private :: isg,ieg,jsg,jeg  ! global domain
-character(len=128),      dimension(:), allocatable         :: registered_file ! file names registered through register_restart_file
+character(len=1024),     dimension(:), allocatable         :: registered_file ! file names registered through register_restart_file
 type(restart_file_type), dimension(:), allocatable         :: files_read  ! store files that are read through read_data
 type(restart_file_type), dimension(:), allocatable, target :: files_write ! store files that are written through write_data
 type(domain2d), dimension(max_domains), target, save  :: array_domain
@@ -3667,11 +3667,11 @@ subroutine restore_state_border(fileObj, directory, nonfatal_missing_files)
 ! Arguments:
 !  (in)      directory - The directory where the restart or save
 !                        files should be found. The default is 'INPUT'
-  character(len=128) :: dir
-  character(len=256) :: restartpath ! The restart file path (dir/file).
-  character(len=200) :: filepath    ! The path (dir/file) to the file being opened.
-  character(len=80)  :: varname     ! A variable's name.
-  character(len=256) :: mesg        ! Message to be constructed for checksum error.
+  character(len=1024) :: dir
+  character(len=256)  :: restartpath ! The restart file path (dir/file).
+  character(len=200)  :: filepath    ! The path (dir/file) to the file being opened.
+  character(len=80)   :: varname     ! A variable's name.
+  character(len=256)  :: mesg        ! Message to be constructed for checksum error.
   type(var_type), pointer, save       :: cur_var=>NULL()
   integer                             :: ndim, nvar, natt, ntime, tlev, siz
   type(fieldtype), allocatable        :: fields(:)
@@ -3915,10 +3915,10 @@ subroutine restore_state_all(fileObj, directory, nonfatal_missing_files)
 !  (in)      directory - The directory where the restart or save
 !                        files should be found. The default is 'INPUT'
 
-  character(len=128) :: dir
-  character(len=256) :: restartpath ! The restart file path (dir/file).
-  character(len=200) :: filepath    ! The path (dir/file) to the file being opened.
-  character(len=8)   :: suffix      ! A suffix (like "_2") that is added to any
+  character(len=1024) :: dir
+  character(len=256)  :: restartpath ! The restart file path (dir/file).
+  character(len=200)  :: filepath    ! The path (dir/file) to the file being opened.
+  character(len=8)    :: suffix      ! A suffix (like "_2") that is added to any
                                     ! additional restart files.
   character(len=80)  :: varname     ! A variable's name.
   character(len=256) :: filename
@@ -4252,10 +4252,10 @@ subroutine restore_state_one_field(fileObj, id_field, directory, nonfatal_missin
 !  (in)      directory - The directory where the restart or save
 !                        files should be found. The default is 'INPUT'
 
-  character(len=128) :: dir
-  character(len=256) :: restartpath ! The restart file path (dir/file).
-  character(len=200) :: filepath    ! The path (dir/file) to the file being opened.
-  character(len=8)   :: suffix      ! A suffix (like "_2") that is added to any
+  character(len=1024) :: dir
+  character(len=256)  :: restartpath ! The restart file path (dir/file).
+  character(len=200)  :: filepath    ! The path (dir/file) to the file being opened.
+  character(len=8)    :: suffix      ! A suffix (like "_2") that is added to any
                                     ! additional restart files.
   character(len=80)  :: varname     ! A variable's name.
   character(len=256) :: filename
@@ -5195,7 +5195,7 @@ character(len=*), intent(in)    :: fieldname
 integer,          intent(inout) :: siz(:)
 logical,          intent(out)   :: found
 
-  character(len=128)             :: name
+  character(len=1024)            :: name
   character(len=1)               :: cart
   integer                        :: i, ndim, nvar, natt, ntime, siz_in(4), j, len
   type(fieldtype)                :: fields(max_fields)
@@ -7223,7 +7223,7 @@ function open_namelist_file (file) result (unit)
   integer :: unit
 ! local variables necessary for nesting code and alternate input.nmls
   character(len=32) :: pelist_name
-  character(len=128) :: filename
+  character(len=1024) :: filename
 
 #ifdef INTERNAL_FILE_NML
   if(show_open_namelist_file_warning) call mpp_error(WARNING, "fms_io_mod: open_namelist_file should not be called when INTERNAL_FILE_NML is defined")
@@ -8147,7 +8147,7 @@ function open_file(file, form, action, access, threading, recl, dist) result(uni
     logical,          intent(in) :: is_no_domain
     logical,          intent(in) :: is_not_dim
 
-    character(len=128)                     :: name
+    character(len=1024)                    :: name
     type(axistype),  dimension(max_axes)   :: axes
     type(fieldtype), dimension(max_fields) :: fields
     integer                                :: i, j, ndim, nvar, natt, var_dim
@@ -8420,7 +8420,7 @@ subroutine parse_mask_table_2d(mask_table, maskmap, modelname)
   integer                      :: nmask, layout(2)
   integer, allocatable         :: mask_list(:,:)
   integer                      :: unit, mystat, n, stdoutunit
-  character(len=128)           :: record
+  character(len=1024)          :: record
 
   maskmap = .true.
   nmask = 0
@@ -8500,7 +8500,7 @@ subroutine parse_mask_table_3d(mask_table, maskmap, modelname)
   integer                      :: nmask, layout(2)
   integer, allocatable         :: mask_list(:,:)
   integer                      :: unit, mystat, n, stdoutunit, ntiles
-  character(len=128)           :: record
+  character(len=1024)          :: record
 
   maskmap = .true.
   nmask = 0
