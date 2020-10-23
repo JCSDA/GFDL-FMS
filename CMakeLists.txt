@@ -7,9 +7,12 @@
 # FMS
 ################################################################################
 
-cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
-project( fms C Fortran )
+find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
+find_package( jedicmake REQUIRED )
+
+project( fms VERSION 0.1.0 LANGUAGES C Fortran )
 
 set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH} )
 
@@ -18,17 +21,10 @@ set( CMAKE_DIRECTORY_LABELS "fms" )
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
 set( ENABLE_OS_TESTS           OFF CACHE BOOL "Disable OS tests" FORCE )
 set( ENABLE_LARGE_FILE_SUPPORT OFF CACHE BOOL "Disable testing of large file support" FORCE )
-set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
-
-include( ecbuild_system NO_POLICY_SCOPE )
-
-ecbuild_requires_macro_version( 2.7 )
 
 ################################################################################
 # Project
 ################################################################################
-
-ecbuild_declare_project()
 
 ecbuild_enable_fortran( REQUIRED )
 
@@ -39,9 +35,6 @@ set( FMS_LINKER_LANGUAGE Fortran )
 ################################################################################
 
 # MPI
-ecbuild_add_option( FEATURE MPI DEFAULT ON
-                    DESCRIPTION "Support for MPI distributed parallelism"
-                    REQUIRED_PACKAGES "MPI COMPONENTS Fortran" )
 ecbuild_find_mpi( COMPONENTS Fortran REQUIRED )
 ecbuild_include_mpi()
 link_libraries(${MPI_Fortran_LIBRARIES})
@@ -55,7 +48,6 @@ endif()
 
 # NetCDF
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
-include_directories( ${NETCDF_INCLUDE_DIR} )
 
 ################################################################################
 # Definitions
@@ -64,13 +56,6 @@ include_directories( ${NETCDF_INCLUDE_DIR} )
 ################################################################################
 # Export package info
 ################################################################################
-
-set( FMS_INCLUDE_DIRS ${CMAKE_Fortran_MODULE_DIRECTORY}
-                      ${CMAKE_CURRENT_SOURCE_DIR}/include
-                      ${CMAKE_CURRENT_SOURCE_DIR}/fms2_io/include
-                      ${CMAKE_CURRENT_SOURCE_DIR}/mpp/include
-                      ${CMAKE_CURRENT_SOURCE_DIR}/fms)
-set( FMS_LIBRARIES fms )
 
 get_directory_property( FMS_DEFINITIONS COMPILE_DEFINITIONS )
 
@@ -331,7 +316,12 @@ list( APPEND fms_src_files
 ################################################################################
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_hdr_files} ${fms_src_files}
-                     LIBS     ${NETCDF_LIBRARIES}
+                     PRIVATE_LIBS    ${NETCDF_LIBRARIES}
+                     PUBLIC_INCLUDES $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+                                     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fms2_io/include>
+                                     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/mpp/include>
+                                     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fms>
+                                     $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
                      INSTALL_HEADERS_LIST ${fms_hdr_files}
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
