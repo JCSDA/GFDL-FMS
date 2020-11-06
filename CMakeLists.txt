@@ -341,11 +341,6 @@ if(HAVE_GETTID)
     target_compile_definitions(fms PRIVATE HAVE_GETTID)
 endif()
 
-
-if(ECBUILD_INSTALL_FORTRAN_MODULES)
-  install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
-endif()
-
 ################################################################################
 # Finalise configuration
 ################################################################################
