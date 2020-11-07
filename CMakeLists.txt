@@ -19,8 +19,6 @@ set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH} )
 set( CMAKE_DIRECTORY_LABELS "fms" )
 
 set( ECBUILD_DEFAULT_BUILD_TYPE Release )
-set( ENABLE_OS_TESTS           OFF CACHE BOOL "Disable OS tests" FORCE )
-set( ENABLE_LARGE_FILE_SUPPORT OFF CACHE BOOL "Disable testing of large file support" FORCE )
 
 ################################################################################
 # Project
@@ -36,37 +34,12 @@ set( FMS_LINKER_LANGUAGE Fortran )
 
 # MPI
 ecbuild_find_mpi( COMPONENTS Fortran REQUIRED )
-ecbuild_include_mpi()
-link_libraries(${MPI_Fortran_LIBRARIES})
 
 # OpenMP
-if( HAVE_OMP )
-  ecbuild_enable_omp()
-else()
-  ecbuild_enable_ompstubs()
-endif()
+ecbuild_find_omp( COMPONENTS Fortran QUIET )
 
 # NetCDF
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
-
-################################################################################
-# Definitions
-################################################################################
-
-################################################################################
-# Export package info
-################################################################################
-
-get_directory_property( FMS_DEFINITIONS COMPILE_DEFINITIONS )
-
-list( APPEND FMS_TPLS NetCDF )
-
-foreach( _tpl ${FMS_TPLS} )
-  string( TOUPPER ${_tpl} TPL )
-  list( APPEND FMS_EXTRA_DEFINITIONS   ${${TPL}_DEFINITIONS}  ${${TPL}_TPL_DEFINITIONS}  )
-  list( APPEND FMS_EXTRA_INCLUDE_DIRS  ${${TPL}_INCLUDE_DIRS} ${${TPL}_TPL_INCLUDE_DIRS} )
-  list( APPEND FMS_EXTRA_LIBRARIES     ${${TPL}_LIBRARIES}    ${${TPL}_TPL_LIBRARIES}    )
-endforeach()
 
 ################################################################################
 # Sources
@@ -74,8 +47,6 @@ endforeach()
 
 # FMS compiler flags are set here (e.g. -Duse_libMPI, etc.)
 include( fms_compiler_flags )
-
-include_directories( ${FMS_INCLUDE_DIRS} ${FMS_EXTRA_INCLUDE_DIRS} )
 
 ################################################################################
 list( APPEND fms_hdr_files
@@ -316,7 +287,7 @@ list( APPEND fms_src_files
 ################################################################################
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_hdr_files} ${fms_src_files}
-                     PRIVATE_LIBS    ${NETCDF_LIBRARIES}
+                     PRIVATE_LIBS    NetCDF::NetCDF_Fortran MPI::MPI_Fortran
                      PUBLIC_INCLUDES $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                                      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/fms2_io/include>
                                      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/mpp/include>
