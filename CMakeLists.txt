@@ -53,7 +53,11 @@ else()
   ecbuild_enable_ompstubs()
 endif()
 
+# jedi-cmakd
+find_package( jedicmake QUIET)
+
 # NetCDF
+set( NETCDF_F90 ON CACHE BOOL "Compile with Fortran NetCDF" )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
 include_directories( ${NETCDF_INCLUDE_DIR} )
 
@@ -343,13 +347,13 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERS
 endif()
 
 # glibc>=2.30 includes gettid in unistd.h if _GNU_SOURCE is set
-include(CheckSymbolExists)
-set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
-check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
-unset(CMAKE_REQUIRED_DEFINITIONS)
-if(HAVE_GETTID)
-    target_compile_definitions(fms PRIVATE HAVE_GETTID)
-endif()
+#include(CheckSymbolExists)
+#set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
+#check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
+#unset(CMAKE_REQUIRED_DEFINITIONS)
+#if(HAVE_GETTID)
+#    target_compile_definitions(fms PRIVATE HAVE_GETTID)
+#endif()
 
 
 if(ECBUILD_INSTALL_FORTRAN_MODULES)
