@@ -335,10 +335,21 @@ list( APPEND fms_src_files
 ################################################################################
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_hdr_files} ${fms_src_files}
-                     LIBS     ${NETCDF_LIBRARIES}
+                     PUBLIC_LIBS     ${NetCDF_LIBRARIES}
+                     PUBLIC_INCLUDES ${NetCDF_INCLUDE_DIRS}
                      INSTALL_HEADERS_LIST ${fms_hdr_files}
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
+################################################################################
+
+#Configure include directory layout for build-tree to match install-tree
+add_custom_target( fms_headers ALL
+                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
+add_dependencies( fms fms_headers )
+
+target_include_directories( fms INTERFACE
+                    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>/include )
+
 ################################################################################
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
@@ -355,10 +366,10 @@ endif()
 #    target_compile_definitions(fms PRIVATE HAVE_GETTID)
 #endif()
 
-
-if(ECBUILD_INSTALL_FORTRAN_MODULES)
-  install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
-endif()
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
+target_include_directories( fms INTERFACE
+                    $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
+                    $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}> )
 
 ################################################################################
 # Finalise configuration
