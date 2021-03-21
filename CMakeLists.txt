@@ -341,9 +341,6 @@ ecbuild_add_library( TARGET   fms
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
 
-target_include_directories( fms INTERFACE
-                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include )
-
 ################################################################################
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
@@ -360,8 +357,12 @@ endif()
 #    target_compile_definitions(fms PRIVATE HAVE_GETTID)
 #endif()
 
-install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
+if(ECBUILD_INSTALL_FORTRAN_MODULES)
+   install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
+endif()
+
 target_include_directories( fms INTERFACE
+                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
                     $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
                     $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}> )
 
