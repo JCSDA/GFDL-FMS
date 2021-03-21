@@ -53,13 +53,13 @@ else()
   ecbuild_enable_ompstubs()
 endif()
 
-# jedi-cmakd
+# jedi-cmake
 find_package( jedicmake QUIET)
 
 # NetCDF
 set( NETCDF_F90 ON CACHE BOOL "Compile with Fortran NetCDF" )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
-include_directories( ${NETCDF_INCLUDE_DIR} )
+include_directories( ${NetCDF_INCLUDE_DIRS} )
 
 ################################################################################
 # Definitions
@@ -340,15 +340,9 @@ ecbuild_add_library( TARGET   fms
                      INSTALL_HEADERS_LIST ${fms_hdr_files}
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
-################################################################################
-
-#Configure include directory layout for build-tree to match install-tree
-add_custom_target( fms_headers ALL
-                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
-add_dependencies( fms fms_headers )
 
 target_include_directories( fms INTERFACE
-                    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>/include )
+                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include )
 
 ################################################################################
 
