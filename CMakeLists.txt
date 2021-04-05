@@ -39,12 +39,7 @@ set( FMS_LINKER_LANGUAGE Fortran )
 ################################################################################
 
 # MPI
-ecbuild_add_option( FEATURE MPI DEFAULT ON
-                    DESCRIPTION "Support for MPI distributed parallelism"
-                    REQUIRED_PACKAGES "MPI COMPONENTS Fortran" )
-ecbuild_find_mpi( COMPONENTS Fortran REQUIRED )
-ecbuild_include_mpi()
-link_libraries(${MPI_Fortran_LIBRARIES})
+find_package( MPI REQUIRED COMPONENTS C CXX Fortran )
 
 # OpenMP
 if( HAVE_OMP )
