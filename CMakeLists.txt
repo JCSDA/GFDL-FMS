@@ -52,9 +52,7 @@ endif()
 find_package( jedicmake QUIET)
 
 # NetCDF
-set( NETCDF_F90 ON CACHE BOOL "Compile with Fortran NetCDF" )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
-include_directories( ${NetCDF_INCLUDE_DIRS} )
 
 ################################################################################
 # Definitions
@@ -331,7 +329,6 @@ list( APPEND fms_src_files
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_hdr_files} ${fms_src_files}
                      PUBLIC_LIBS     ${NetCDF_LIBRARIES}
-                     PUBLIC_INCLUDES ${NetCDF_INCLUDE_DIRS}
                      INSTALL_HEADERS_LIST ${fms_hdr_files}
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
@@ -353,13 +350,13 @@ endif()
 #endif()
 
 if(ECBUILD_INSTALL_FORTRAN_MODULES)
-   install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${INSTALL_INCLUDE_DIR} )
+   install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
 endif()
 
 target_include_directories( fms INTERFACE
                     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
                     $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
-                    $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}> )
+                    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 
 ################################################################################
 # Finalise configuration
