@@ -340,13 +340,15 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERS
                                                    $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>)
 endif()
 
-#glibc>=2.30 includes gettid in unistd.h if _GNU_SOURCE is set
-include(CheckSymbolExists)
-set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
-check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
-unset(CMAKE_REQUIRED_DEFINITIONS)
-if(HAVE_GETTID)
-   target_compile_definitions(fms PRIVATE HAVE_GETTID)
+if(UNIX AND NOT APPLE)
+    #glibc>=2.30 includes gettid in unistd.h if _GNU_SOURCE is set
+    include(CheckSymbolExists)
+    set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
+    check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
+    unset(CMAKE_REQUIRED_DEFINITIONS)
+    if(HAVE_GETTID)
+        target_compile_definitions(fms PRIVATE HAVE_GETTID)
+    endif()
 endif()
 
 if(ECBUILD_INSTALL_FORTRAN_MODULES)
