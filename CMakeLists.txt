@@ -328,7 +328,7 @@ list( APPEND fms_src_files
 ################################################################################
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_hdr_files} ${fms_src_files}
-                     PUBLIC_LIBS     ${NetCDF_LIBRARIES}
+                     PUBLIC_LIBS     ${NetCDF_LIBRARIES} MPI::MPI_Fortran
                      INSTALL_HEADERS_LIST ${fms_hdr_files}
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
@@ -340,14 +340,14 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERS
                                                    $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>)
 endif()
 
-# glibc>=2.30 includes gettid in unistd.h if _GNU_SOURCE is set
-#include(CheckSymbolExists)
-#set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
-#check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
-#unset(CMAKE_REQUIRED_DEFINITIONS)
-#if(HAVE_GETTID)
-#    target_compile_definitions(fms PRIVATE HAVE_GETTID)
-#endif()
+#glibc>=2.30 includes gettid in unistd.h if _GNU_SOURCE is set
+include(CheckSymbolExists)
+set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
+check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
+unset(CMAKE_REQUIRED_DEFINITIONS)
+if(HAVE_GETTID)
+   target_compile_definitions(fms PRIVATE HAVE_GETTID)
+endif()
 
 if(ECBUILD_INSTALL_FORTRAN_MODULES)
    install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
