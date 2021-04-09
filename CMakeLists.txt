@@ -281,18 +281,21 @@ target_link_libraries( fms PUBLIC OpenMP::OpenMP_C OpenMP::OpenMP_Fortran )
 
 ################################################################################
 
-# Enable support for GFortran >= 10.x
+# Disable compiler checks for GFortran >= 10.x
 if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-fallow-invalid-boz>
                                                    $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>)
 endif()
 
 if(UNIX AND NOT APPLE)
-    #FIX for glibc>=2.30 which includes gettid in unistd.h if _GNU_SOURCE is set
+    #FIX for linking error with glibc>=2.30 which includes gettid in unistd.h if macro _GNU_SOURCE is set
     include(CheckSymbolExists)
+    include(CMakePushCheckState)
+    cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
     check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
     unset(CMAKE_REQUIRED_DEFINITIONS)
+    cmake_pop_check_state() # Restore any modified state
     if(HAVE_GETTID)
         target_compile_definitions(fms PRIVATE HAVE_GETTID)
     endif()
@@ -307,9 +310,15 @@ target_include_directories(${PROJECT_NAME} INTERFACE
                             $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${MODULE_DIR}>
                             $<INSTALL_INTERFACE:${MODULE_DIR}>)
 
-target_include_directories( fms INTERFACE
-                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
-                    $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
+# Private .inc include locations
+target_include_directories( fms PRIVATE
+                    ${CMAKE_CURRENT_SOURCE_DIR}/mpp/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/fms2_io/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/fms)
+
+# Installed .h include locations (fms_hdr_files)
+target_include_directories( fms PUBLIC
+                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 
 # Export package config
