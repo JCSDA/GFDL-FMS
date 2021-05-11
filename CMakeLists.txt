@@ -303,7 +303,7 @@ endif()
 
 
 # Fortran module output directory for build and install interfaces
-set(MODULE_DIR ${PROJECT_NAME}/module/${CMAKE_Fortran_COMPILER_ID}/${CMAKE_Fortran_COMPILER_VERSION})
+set(MODULE_DIR ${PROJECT_NAME}/module)
 set_target_properties(${PROJECT_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR})
 install(DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR}/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/${MODULE_DIR})
 target_include_directories(${PROJECT_NAME} INTERFACE
