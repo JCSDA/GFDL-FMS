@@ -7,89 +7,31 @@
 # FMS
 ################################################################################
 
-cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
-
+cmake_minimum_required( VERSION 3.12 )
 project( fms VERSION 2020.4.0 LANGUAGES C Fortran )
 
-set( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH} )
-
-set( CMAKE_DIRECTORY_LABELS "fms" )
-
-set( ECBUILD_DEFAULT_BUILD_TYPE Release )
-set( ENABLE_OS_TESTS           OFF CACHE BOOL "Disable OS tests" FORCE )
-set( ENABLE_LARGE_FILE_SUPPORT OFF CACHE BOOL "Disable testing of large file support" FORCE )
-set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
-
+## Ecbuild integration
+find_package( ecbuild 3.3.2 REQUIRED )
 include( ecbuild_system NO_POLICY_SCOPE )
-
-ecbuild_requires_macro_version( 2.7 )
-
-################################################################################
-# Project
-################################################################################
-
 ecbuild_declare_project()
+list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
+set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 
-ecbuild_enable_fortran( REQUIRED )
-
-set( FMS_LINKER_LANGUAGE Fortran )
+include( fms_compiler_flags )
 
 ################################################################################
 # Dependencies
 ################################################################################
 
-# MPI
-find_package( MPI REQUIRED COMPONENTS C CXX Fortran )
-
-# OpenMP
-if( HAVE_OMP )
-  ecbuild_enable_omp()
-else()
-  ecbuild_enable_ompstubs()
-endif()
-
-# jedi-cmake
 find_package( jedicmake QUIET)
-
-# NetCDF
+find_package( MPI REQUIRED COMPONENTS C Fortran )
+find_package( OpenMP COMPONENTS C Fortran )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
-
-################################################################################
-# Definitions
-################################################################################
-
-################################################################################
-# Export package info
-################################################################################
-
-set( FMS_INCLUDE_DIRS ${CMAKE_Fortran_MODULE_DIRECTORY}
-                      ${CMAKE_CURRENT_SOURCE_DIR}/include
-                      ${CMAKE_CURRENT_SOURCE_DIR}/fms2_io/include
-                      ${CMAKE_CURRENT_SOURCE_DIR}/mpp/include
-                      ${CMAKE_CURRENT_SOURCE_DIR}/fms)
-set( FMS_LIBRARIES fms )
-
-get_directory_property( FMS_DEFINITIONS COMPILE_DEFINITIONS )
-
-list( APPEND FMS_TPLS NetCDF )
-
-foreach( _tpl ${FMS_TPLS} )
-  string( TOUPPER ${_tpl} TPL )
-  list( APPEND FMS_EXTRA_DEFINITIONS   ${${TPL}_DEFINITIONS}  ${${TPL}_TPL_DEFINITIONS}  )
-  list( APPEND FMS_EXTRA_INCLUDE_DIRS  ${${TPL}_INCLUDE_DIRS} ${${TPL}_TPL_INCLUDE_DIRS} )
-  list( APPEND FMS_EXTRA_LIBRARIES     ${${TPL}_LIBRARIES}    ${${TPL}_TPL_LIBRARIES}    )
-endforeach()
 
 ################################################################################
 # Sources
 ################################################################################
 
-# FMS compiler flags are set here (e.g. -Duse_libMPI, etc.)
-include( fms_compiler_flags )
-
-include_directories( ${FMS_INCLUDE_DIRS} ${FMS_EXTRA_INCLUDE_DIRS} )
-
-################################################################################
 list( APPEND fms_hdr_files
 include/file_version.h
 include/fms_platform.h
@@ -328,42 +270,57 @@ list( APPEND fms_src_files
 ################################################################################
 ecbuild_add_library( TARGET   fms
                      SOURCES  ${fms_hdr_files} ${fms_src_files}
-                     PUBLIC_LIBS     ${NetCDF_LIBRARIES}
                      INSTALL_HEADERS_LIST ${fms_hdr_files}
                      LINKER_LANGUAGE ${FMS_LINKER_LANGUAGE}
                     )
 
+# Link dependencies
+target_link_libraries( fms PUBLIC NetCDF::NetCDF_Fortran )
+target_link_libraries( fms PUBLIC MPI::MPI_Fortran )
+target_link_libraries( fms PUBLIC OpenMP::OpenMP_C OpenMP::OpenMP_Fortran )
+
 ################################################################################
 
+# Disable compiler checks for GFortran >= 10.x
 if(CMAKE_Fortran_COMPILER_ID MATCHES GNU AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-fallow-invalid-boz>
                                                    $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>)
 endif()
 
-# glibc>=2.30 includes gettid in unistd.h if _GNU_SOURCE is set
-#include(CheckSymbolExists)
-#set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
-#check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
-#unset(CMAKE_REQUIRED_DEFINITIONS)
-#if(HAVE_GETTID)
-#    target_compile_definitions(fms PRIVATE HAVE_GETTID)
-#endif()
-
-if(ECBUILD_INSTALL_FORTRAN_MODULES)
-   install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/${CMAKE_CFG_INTDIR} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
+if(UNIX AND NOT APPLE)
+    #FIX for linking error with glibc>=2.30 which includes gettid in unistd.h if macro _GNU_SOURCE is set
+    include(CheckSymbolExists)
+    include(CMakePushCheckState)
+    cmake_push_check_state(RESET)
+    set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE=1")
+    check_symbol_exists("gettid" "unistd.h" HAVE_GETTID)
+    unset(CMAKE_REQUIRED_DEFINITIONS)
+    cmake_pop_check_state() # Restore any modified state
+    if(HAVE_GETTID)
+        target_compile_definitions(fms PRIVATE HAVE_GETTID)
+    endif()
 endif()
 
-target_include_directories( fms INTERFACE
-                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
-                    $<BUILD_INTERFACE:${CMAKE_Fortran_MODULE_DIRECTORY}>
+
+# Fortran module output directory for build and install interfaces
+set(MODULE_DIR ${PROJECT_NAME}/module)
+set_target_properties(${PROJECT_NAME} PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR})
+install(DIRECTORY ${CMAKE_BINARY_DIR}/${MODULE_DIR}/ DESTINATION ${CMAKE_INSTALL_LIBDIR}/${MODULE_DIR})
+target_include_directories(${PROJECT_NAME} INTERFACE
+                            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${MODULE_DIR}>
+                            $<INSTALL_INTERFACE:${MODULE_DIR}>)
+
+# Private .inc include locations
+target_include_directories( fms PRIVATE
+                    ${CMAKE_CURRENT_SOURCE_DIR}/mpp/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/fms2_io/include
+                    ${CMAKE_CURRENT_SOURCE_DIR}/fms)
+
+# Installed .h include locations (fms_hdr_files)
+target_include_directories( fms PUBLIC
+                    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 
-################################################################################
-# Finalise configuration
-################################################################################
-
-# prepares a tar.gz of the sources and/or binaries
+# Export package config
 ecbuild_install_project( NAME fms )
-
-# print the summary of the configuration
 ecbuild_print_summary()
